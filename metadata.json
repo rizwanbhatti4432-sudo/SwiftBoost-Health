@@ -1,0 +1,6 @@
+{
+  "name": "Clean Master & Health",
+  "description": "Device Cleaner Master, Memory Booster, Battery Health Monitor, and Hardware Performance Diagnostics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
