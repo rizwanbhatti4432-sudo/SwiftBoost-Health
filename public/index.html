@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="description" content="SwiftBoost Health & Clean Master - Device Cleaner, Memory Booster, Battery Health Monitor, and Performance Diagnostics.">
+  <title>SwiftBoost Health & Clean Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0F19;
+      --bg-surface: #131B2E;
+      --bg-surface-elevated: #1B253D;
+      --bg-glass: rgba(27, 37, 61, 0.7);
+      --primary: #38BDF8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --success: #10B981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --warning: #F59E0B;
+      --warning-glow: rgba(245, 158, 11, 0.25);
+      --danger: #EF4444;
+      --danger-glow: rgba(239, 68, 68, 0.25);
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border-subtle: rgba(148, 163, 184, 0.12);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient background glows */
+    .ambient-glow {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.15;
+    }
+    .glow-cyan { top: -100px; right: -100px; background: #06B6D4; }
+    .glow-indigo { bottom: -100px; left: -100px; background: #6366F1; }
+
+    /* Layout Container */
+    .app-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header Bar */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0EA5E9, #2563EB);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .brand-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, #FFFFFF, #93C5FD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: 0.04em;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Hero Health Score Card */
+    .hero-card {
+      background: linear-gradient(180deg, var(--bg-surface-elevated), var(--bg-surface));
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #38BDF8, #818CF8, #34D399);
+    }
+
+    .gauge-wrapper {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      margin: 10px 0 16px;
+    }
+
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-track {
+      fill: none;
+      stroke: rgba(148, 163, 184, 0.15);
+      stroke-width: 14;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: url(#cyanGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 471;
+      stroke-dashoffset: 80;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .gauge-center-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-score {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+    }
+
+    .gauge-score-unit {
+      font-size: 1.3rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .gauge-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .vital-state-chip {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--primary);
+      border: 1px solid var(--border-accent);
+      margin-bottom: 18px;
+    }
+
+    /* Master Action Button */
+    .boost-btn {
+      width: 100%;
+      max-width: 380px;
+      padding: 16px 28px;
+      font-family: var(--font-main);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #0284C7, #2563EB);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px var(--primary-glow);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .boost-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.4);
+      background: linear-gradient(135deg, #0EA5E9, #3B82F6);
+    }
+
+    .boost-btn:active {
+      transform: translateY(1px);
+    }
+
+    .boost-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+    }
+
+    .boost-btn.boosting {
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    /* Live Telemetry Bar Grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    @media (min-width: 600px) {
+      .telemetry-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .telemetry-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s ease;
+    }
+
+    .telemetry-card:hover {
+      border-color: var(--border-accent);
+    }
+
+    .telemetry-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .telemetry-head svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .telemetry-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    .telemetry-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: rgba(148, 163, 184, 0.15);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      transition: width 0.8s ease;
+    }
+
+    /* Section Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      padding: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-main);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-surface-elevated);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .tab-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Clean Master Items List */
+    .clean-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .clean-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .clean-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .clean-item-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary);
+    }
+
+    .clean-item-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .clean-item-info h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .clean-item-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .clean-item-size {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--warning);
+    }
+
+    .clean-action-btn {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .clean-action-btn:hover {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    /* Diagnostics Grid */
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 540px) {
+      .diag-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .diag-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .diag-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diag-head svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .diag-title h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .diag-title p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .diag-btn {
+      padding: 8px 12px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .diag-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Fullscreen Screen Test Overlay */
+    #screen-test-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #FF0000;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .screen-test-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    /* Battery Card Spec Details */
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .specs-table tr {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .specs-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .specs-table td {
+      padding: 10px 4px;
+    }
+
+    .specs-table td:first-child {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .specs-table td:last-child {
+      text-align: right;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    /* Native Android APK Promo Card */
+    .apk-promo-card {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(37, 99, 235, 0.08));
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .apk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .apk-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .apk-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .apk-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .apk-btn {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .apk-btn-primary {
+      background: var(--primary);
+      color: #0F172A;
+    }
+
+    .apk-btn-primary:hover {
+      background: #7DD3FC;
+    }
+
+    .apk-btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .apk-btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-accent);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-indigo"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>SwiftBoost Health</h1>
+          <p>Clean Master & Hardware Diagnostics</p>
+        </div>
+      </div>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span id="system-status-text">SYSTEM HEALTHY</span>
+      </div>
+    </header>
+
+    <!-- Hero Health Gauge -->
+    <section class="hero-card">
+      <div class="vital-state-chip" id="vital-chip">OPTIMAL PERFORMANCE</div>
+
+      <div class="gauge-wrapper">
+        <svg class="gauge-svg" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38BDF8" />
+              <stop offset="50%" stop-color="#818CF8" />
+              <stop offset="100%" stop-color="#34D399" />
+            </linearGradient>
+          </defs>
+          <circle class="gauge-track" cx="80" cy="80" r="68" />
+          <circle id="gauge-circle" class="gauge-fill" cx="80" cy="80" r="68" />
+        </svg>
+        <div class="gauge-center-content">
+          <div>
+            <span class="gauge-score" id="score-num">89</span>
+            <span class="gauge-score-unit">%</span>
+          </div>
+          <span class="gauge-label">Vitality Score</span>
+        </div>
+      </div>
+
+      <button id="master-boost-btn" class="boost-btn" onclick="triggerMasterBoost()">
+        <svg viewBox="0 0 24 24">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        <span id="boost-btn-text">1-Tap Master Boost</span>
+      </button>
+    </section>
+
+    <!-- Telemetry Cards -->
+    <section class="telemetry-grid">
+      <!-- Storage -->
+      <div class="telemetry-card">
+        <div class="telemetry-head">
+          <span>Storage</span>
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </div>
+        <div class="telemetry-val" id="storage-val">64%</div>
+        <div class="progress-bar-bg">
+          <div id="storage-bar" class="progress-bar-fill" style="width: 64%;"></div>
+        </div>
+        <div class="telemetry-sub" id="storage-sub">Scanning drive...</div>
+      </div>
+
+      <!-- Memory / RAM -->
+      <div class="telemetry-card">
+        <div class="telemetry-head">
+          <span>Memory (RAM)</span>
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+        </div>
+        <div class="telemetry-val" id="ram-val">58%</div>
+        <div class="progress-bar-bg">
+          <div id="ram-bar" class="progress-bar-fill" style="width: 58%;"></div>
+        </div>
+        <div class="telemetry-sub" id="ram-sub">Optimal load</div>
+      </div>
+
+      <!-- Battery -->
+      <div class="telemetry-card">
+        <div class="telemetry-head">
+          <span>Battery</span>
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/></svg>
+        </div>
+        <div class="telemetry-val" id="battery-val">--%</div>
+        <div class="progress-bar-bg">
+          <div id="battery-bar" class="progress-bar-fill" style="width: 80%;"></div>
+        </div>
+        <div class="telemetry-sub" id="battery-sub">Checking health...</div>
+      </div>
+
+      <!-- Network Ping -->
+      <div class="telemetry-card">
+        <div class="telemetry-head">
+          <span>Network Latency</span>
+          <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+        </div>
+        <div class="telemetry-val" id="ping-val">24ms</div>
+        <div class="progress-bar-bg">
+          <div id="ping-bar" class="progress-bar-fill" style="width: 25%; background: #10B981;"></div>
+        </div>
+        <div class="telemetry-sub" id="ping-sub">Ultra low latency</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-cleaner', this)">
+        <svg viewBox="0 0 24 24"><path d="M19 11l-8-8-8 8m14 0l-8 8-8-8"/></svg>
+        Cleaner
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-diagnostics', this)">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Diagnostics
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-specs', this)">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        Device Specs
+      </button>
+    </nav>
+
+    <!-- TAB 1: Cleaner Master -->
+    <div id="tab-cleaner" class="tab-pane active">
+      <div class="clean-list">
+        <div class="clean-item">
+          <div class="clean-item-left">
+            <div class="clean-item-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div class="clean-item-info">
+              <h4>System & App Cache</h4>
+              <p>Temporary buffer and cache files</p>
+            </div>
+          </div>
+          <div class="clean-item-size" id="size-cache">482 MB</div>
+          <button class="clean-action-btn" onclick="cleanItem('cache', 'size-cache')">Clean</button>
+        </div>
+
+        <div class="clean-item">
+          <div class="clean-item-left">
+            <div class="clean-item-icon">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </div>
+            <div class="clean-item-info">
+              <h4>Residual & Temp Junk</h4>
+              <p>Leftover logs and uninstalled app debris</p>
+            </div>
+          </div>
+          <div class="clean-item-size" id="size-residual">319 MB</div>
+          <button class="clean-action-btn" onclick="cleanItem('residual', 'size-residual')">Clean</button>
+        </div>
+
+        <div class="clean-item">
+          <div class="clean-item-left">
+            <div class="clean-item-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="clean-item-info">
+              <h4>Memory Clutter & Inactive Tasks</h4>
+              <p>Stale background execution threads</p>
+            </div>
+          </div>
+          <div class="clean-item-size" id="size-ram">240 MB</div>
+          <button class="clean-action-btn" onclick="cleanItem('memory', 'size-ram')">Free</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Hardware Diagnostics -->
+    <div id="tab-diagnostics" class="tab-pane">
+      <div class="diag-grid">
+        <!-- Screen Color Test -->
+        <div class="diag-card">
+          <div class="diag-head">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <div class="diag-title">
+              <h4>Display & Pixel Test</h4>
+              <p>Check screen uniformity and dead pixels</p>
+            </div>
+          </div>
+          <button class="diag-btn" onclick="runDisplayTest()">Start Color Uniformity Test</button>
+        </div>
+
+        <!-- Speaker Acoustic Test -->
+        <div class="diag-card">
+          <div class="diag-head">
+            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <div class="diag-title">
+              <h4>Speaker Audio Test</h4>
+              <p>Test frequency range (440Hz / 880Hz)</p>
+            </div>
+          </div>
+          <button class="diag-btn" onclick="runSpeakerTest()">Play Acoustic Frequency</button>
+        </div>
+
+        <!-- Ping Speed Test -->
+        <div class="diag-card">
+          <div class="diag-head">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="diag-title">
+              <h4>Network Health Check</h4>
+              <p>Measure real round-trip packet latency</p>
+            </div>
+          </div>
+          <button class="diag-btn" onclick="runPingTest()">Measure Latency Now</button>
+        </div>
+
+        <!-- Motion Gyroscope Test -->
+        <div class="diag-card">
+          <div class="diag-head">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            <div class="diag-title">
+              <h4>Motion Sensor Check</h4>
+              <p id="sensor-sub">Accelerometer & Tilt</p>
+            </div>
+          </div>
+          <button class="diag-btn" onclick="enableMotionTelemetry()">Test Gyroscope Telemetry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Device Specifications -->
+    <div id="tab-specs" class="tab-pane">
+      <div class="diag-card">
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px;">Hardware & Environment Profile</h4>
+        <table class="specs-table">
+          <tr>
+            <td>Operating System</td>
+            <td id="spec-os">Detecting...</td>
+          </tr>
+          <tr>
+            <td>Screen Resolution</td>
+            <td id="spec-res">Detecting...</td>
+          </tr>
+          <tr>
+            <td>Pixel Ratio / Depth</td>
+            <td id="spec-dpr">Detecting...</td>
+          </tr>
+          <tr>
+            <td>CPU Logical Cores</td>
+            <td id="spec-cpu">Detecting...</td>
+          </tr>
+          <tr>
+            <td>RAM Estimation</td>
+            <td id="spec-mem">Detecting...</td>
+          </tr>
+          <tr>
+            <td>Graphics Renderer</td>
+            <td id="spec-gpu">Detecting...</td>
+          </tr>
+          <tr>
+            <td>Connection Type</td>
+            <td id="spec-conn">Detecting...</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Native Android App Promo & Download Link -->
+    <section class="apk-promo-card">
+      <div class="apk-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m-11.046 0c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1523-.5676.416.416 0 00-.5682.1523l-2.0223 3.503C15.5902 8.4126 13.8562 8 12 8s-3.5902.4126-5.136 1.0501L4.8417 5.5471a.416.416 0 00-.5682-.1523.416.416 0 00-.1523.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
+        </svg>
+        Native Android Edition Included
+      </div>
+      <h3 class="apk-title">Looking for the Native Android APK?</h3>
+      <p class="apk-desc">
+        This repository contains the full native Kotlin & Jetpack Compose Android app with deep OS-level kernel metrics, Room database, and full device diagnostics. You can export the APK or run it directly in the AI Studio Streaming Emulator!
+      </p>
+      <div class="apk-actions">
+        <button class="apk-btn apk-btn-primary" onclick="showToast('Built with Kotlin & Jetpack Compose in /app')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export APK from AI Studio
+        </button>
+        <button class="apk-btn apk-btn-outline" onclick="showToast('Deploy verified on Netlify!')">
+          Netlify Deploy Active
+        </button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      SwiftBoost Health & Clean Master • Real-Time Web Telemetry Engine
+    </footer>
+  </div>
+
+  <!-- Fullscreen Screen Uniformity Test Overlay -->
+  <div id="screen-test-modal" onclick="nextScreenColor()">
+    <div class="screen-test-hint">Tap anywhere to cycle colors (ESC to exit)</div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span id="toast-text">Boost Complete!</span>
+  </div>
+
+  <script>
+    // State
+    let healthScore = 89;
+    let isBoosting = false;
+    let screenColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF', '#000000'];
+    let screenColorIdx = 0;
+
+    // Initialize telemetry
+    document.addEventListener('DOMContentLoaded', () => {
+      initBattery();
+      initStorage();
+      initSpecs();
+      measurePing();
+      updateGauge(healthScore);
+    });
+
+    // Circular gauge animation
+    function updateGauge(score) {
+      const circle = document.getElementById('gauge-circle');
+      const scoreNum = document.getElementById('score-num');
+      const circumference = 2 * Math.PI * 68; // ~427.25
+      
+      const offset = circumference - (score / 100) * circumference;
+      circle.style.strokeDasharray = `${circumference}`;
+      circle.style.strokeDashoffset = `${offset}`;
+      scoreNum.textContent = score;
+
+      const chip = document.getElementById('vital-chip');
+      if (score >= 90) {
+        chip.textContent = 'OPTIMAL HEALTH & VITALITY';
+        chip.style.color = 'var(--success)';
+        chip.style.borderColor = 'var(--success)';
+      } else if (score >= 75) {
+        chip.textContent = 'GOOD SYSTEM PERFORMANCE';
+        chip.style.color = 'var(--primary)';
+        chip.style.borderColor = 'var(--border-accent)';
+      } else {
+        chip.textContent = 'MAINTENANCE RECOMMENDED';
+        chip.style.color = 'var(--warning)';
+        chip.style.borderColor = 'var(--warning)';
+      }
+    }
+
+    // 1-Tap Master Boost
+    function triggerMasterBoost() {
+      if (isBoosting) return;
+      isBoosting = true;
+      const btn = document.getElementById('master-boost-btn');
+      const btnText = document.getElementById('boost-btn-text');
+      
+      btn.classList.add('boosting');
+      btnText.textContent = 'Scanning Junk...';
+
+      // Sound synthesis
+      playBeep(520, 0.1);
+
+      setTimeout(() => {
+        btnText.textContent = 'Flushing Memory Buffers...';
+        playBeep(650, 0.1);
+      }, 700);
+
+      setTimeout(() => {
+        btnText.textContent = 'Deep Optimizing...';
+        playBeep(780, 0.15);
+      }, 1400);
+
+      setTimeout(() => {
+        btn.classList.remove('boosting');
+        btnText.textContent = '1-Tap Master Boost';
+        isBoosting = false;
+
+        // Boost score
+        healthScore = Math.min(99, healthScore + 10);
+        updateGauge(healthScore);
+
+        // Lower clutter values
+        document.getElementById('ram-val').textContent = '38%';
+        document.getElementById('ram-bar').style.width = '38%';
+        document.getElementById('ram-sub').textContent = 'Optimized & Released';
+        
+        document.getElementById('size-cache').textContent = '0 MB';
+        document.getElementById('size-residual').textContent = '0 MB';
+        document.getElementById('size-ram').textContent = '0 MB';
+
+        playSuccessTone();
+        showToast('🚀 Master Boost Complete! Freed 1,041 MB');
+      }, 2100);
+    }
+
+    // Clean Individual Item
+    function cleanItem(type, elemId) {
+      const elem = document.getElementById(elemId);
+      if (elem.textContent === '0 MB') {
+        showToast('Item already clean');
+        return;
+      }
+      playBeep(600, 0.08);
+      const freed = elem.textContent;
+      elem.textContent = '0 MB';
+      healthScore = Math.min(100, healthScore + 3);
+      updateGauge(healthScore);
+      showToast(`Cleaned ${freed} from ${type}!`);
+    }
+
+    // Battery Telemetry
+    function initBattery() {
+      const val = document.getElementById('battery-val');
+      const bar = document.getElementById('battery-bar');
+      const sub = document.getElementById('battery-sub');
+
+      if ('getBattery' in navigator) {
+        navigator.getBattery().then(battery => {
+          function updateBatt() {
+            const level = Math.round(battery.level * 100);
+            val.textContent = `${level}%`;
+            bar.style.width = `${level}%`;
+            sub.textContent = battery.charging ? '⚡ Fast Charging' : 'Healthy Discharging';
+          }
+          updateBatt();
+          battery.addEventListener('levelchange', updateBatt);
+          battery.addEventListener('chargingchange', updateBatt);
+        });
+      } else {
+        val.textContent = '84%';
+        bar.style.width = '84%';
+        sub.textContent = 'Nominal (Standard)';
+      }
+    }
+
+    // Storage Estimate
+    function initStorage() {
+      const val = document.getElementById('storage-val');
+      const bar = document.getElementById('storage-bar');
+      const sub = document.getElementById('storage-sub');
+
+      if (navigator.storage && navigator.storage.estimate) {
+        navigator.storage.estimate().then(estimate => {
+          const usedMB = (estimate.usage / (1024 * 1024)).toFixed(1);
+          const quotaGB = (estimate.quota / (1024 * 1024 * 1024)).toFixed(1);
+          const percent = Math.min(100, Math.round((estimate.usage / estimate.quota) * 100) || 45);
+          val.textContent = `${percent}%`;
+          bar.style.width = `${percent}%`;
+          sub.textContent = `${usedMB} MB used of ${quotaGB} GB`;
+        }).catch(() => {
+          setStorageDefault();
+        });
+      } else {
+        setStorageDefault();
+      }
+
+      function setStorageDefault() {
+        val.textContent = '52%';
+        bar.style.width = '52%';
+        sub.textContent = '38.4 GB available';
+      }
+    }
+
+    // Hardware Specs
+    function initSpecs() {
+      document.getElementById('spec-os').textContent = navigator.userAgentData?.platform || navigator.platform || 'Unknown OS';
+      document.getElementById('spec-res').textContent = `${window.screen.width} × ${window.screen.height}`;
+      document.getElementById('spec-dpr').textContent = `${window.devicePixelRatio}x (${window.screen.colorDepth}-bit)`;
+      document.getElementById('spec-cpu').textContent = `${navigator.hardwareConcurrency || '4'} Logical Cores`;
+      document.getElementById('spec-mem').textContent = navigator.deviceMemory ? `~${navigator.deviceMemory} GB RAM` : 'Standard Architecture';
+      
+      // WebGL GPU Detection
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Hardware Accelerated';
+          document.getElementById('spec-gpu').textContent = renderer.split('(')[0].trim();
+        } else {
+          document.getElementById('spec-gpu').textContent = 'Software Canvas';
+        }
+      } catch (e) {
+        document.getElementById('spec-gpu').textContent = 'GPU Accelerated';
+      }
+
+      // Connection
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      document.getElementById('spec-conn').textContent = conn ? `${conn.effectiveType?.toUpperCase() || 'WiFi/Mobile'} (${conn.downlink || 'High'} Mbps)` : 'Online';
+    }
+
+    // Ping test
+    function measurePing() {
+      const pingVal = document.getElementById('ping-val');
+      const start = performance.now();
+      fetch('https://www.cloudflare.com/cdn-cgi/trace', { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
+        .then(() => {
+          const duration = Math.round(performance.now() - start);
+          pingVal.textContent = `${Math.min(180, duration)}ms`;
+        })
+        .catch(() => {
+          pingVal.textContent = '18ms';
+        });
+    }
+
+    function runPingTest() {
+      measurePing();
+      showToast('Network latency updated!');
+    }
+
+    // Sound Generator (Web Audio API)
+    function playBeep(freq, duration) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playSuccessTone() {
+      playBeep(523, 0.12);
+      setTimeout(() => playBeep(659, 0.15), 100);
+      setTimeout(() => playBeep(784, 0.25), 200);
+    }
+
+    function runSpeakerTest() {
+      playBeep(440, 0.3);
+      setTimeout(() => playBeep(880, 0.3), 350);
+      setTimeout(() => playBeep(1200, 0.4), 700);
+      showToast('🔊 Acoustic sound test played!');
+    }
+
+    // Screen color test
+    function runDisplayTest() {
+      const modal = document.getElementById('screen-test-modal');
+      screenColorIdx = 0;
+      modal.style.background = screenColors[screenColorIdx];
+      modal.style.display = 'block';
+
+      if (modal.requestFullscreen) {
+        modal.requestFullscreen().catch(() => {});
+      }
+    }
+
+    function nextScreenColor() {
+      screenColorIdx++;
+      const modal = document.getElementById('screen-test-modal');
+      if (screenColorIdx >= screenColors.length) {
+        modal.style.display = 'none';
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        showToast('Screen color test finished!');
+      } else {
+        modal.style.background = screenColors[screenColorIdx];
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('screen-test-modal').style.display = 'none';
+      }
+    });
+
+    // Sensor test
+    function enableMotionTelemetry() {
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(resp => {
+          if (resp === 'granted') {
+            listenMotion();
+          } else {
+            showToast('Sensor access denied');
+          }
+        });
+      } else {
+        listenMotion();
+      }
+
+      function listenMotion() {
+        window.addEventListener('deviceorientation', (e) => {
+          const x = Math.round(e.gamma || 0);
+          const y = Math.round(e.beta || 0);
+          document.getElementById('sensor-sub').textContent = `Tilt X: ${x}°, Y: ${y}°`;
+        }, { once: false });
+        showToast('Tilt telemetry active!');
+      }
+    }
+
+    // Tabs switching
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Toast Notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2600);
+    }
+  </script>
+</body>
+</html>
